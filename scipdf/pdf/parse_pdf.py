@@ -109,6 +109,14 @@ def parse_pdf(
         parsed_article = BeautifulSoup(parsed_article, "lxml")
     return parsed_article
 
+def parse_title(article):
+    """
+    Parse title from a given BeautifulSoup of an article
+    """
+    title = article.find("title", attrs={'type': 'main', 'level': 'a'} )
+    title = title.text.strip() if title is not None else ""
+    return title
+
 
 def parse_authors(article):
     """
@@ -130,7 +138,6 @@ def parse_authors(article):
     authors = "; ".join(authors)
     return authors
 
-
 def parse_date(article):
     """
     Parse date from a given BeautifulSoup of an article
@@ -139,6 +146,14 @@ def parse_date(article):
     year = pub_date.find("date")
     year = year.attrs.get("when") if year is not None else ""
     return year
+    
+def parse_doi(article):
+    """
+    Parse DOI from a given BeautifulSoup of an article
+    """
+    doi = article.find("idno", attrs={'type': 'DOI'})
+    doi = doi.text if doi is not None else ""
+    return doi
 
 
 def parse_abstract(article):
@@ -348,9 +363,10 @@ def convert_article_soup_to_dict(article, as_list: bool = False):
         title = article.find("title", attrs={"type": "main"})
         title = title.text.strip() if title is not None else ""
 
-        article_dict["title"] = title
+        article_dict["title"] = parse_title(article)
         article_dict["authors"] = parse_authors(article)
         article_dict["pub_date"] = parse_date(article)
+        article_dict["DOI"] = parse_doi(article)
         article_dict["abstract"] = parse_abstract(article)
         article_dict["sections"] = parse_sections(article, as_list=as_list)
         article_dict["references"] = parse_references(article)
@@ -453,3 +469,4 @@ def parse_figures(
         print(
             "You may have to check of ``data`` and ``figures`` in the the output folder path."
         )
+
